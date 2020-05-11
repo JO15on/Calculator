@@ -33,33 +33,36 @@ class Calculator extends React.Component{
         } else if (pressedButton === '=') {
             result = this.calculate(this.parseCalculationString(equation));
             this.setState({result});
-        }  
+        }  else if (pressedButton === 'B') {
+            console.log(pressedButton);
+            equation = equation.trim();
+            equation = equation.substr(0, equation.length - 1);
+        }
 
         this.setState({equation: equation});
     }
     
-    parseCalculationString(s) {
+    parseCalculationString(s) { 
         // --- Parse a calculation string into an array of numbers and operators
-        var calculation = [],
-            current = '';
-        for (var i = 0, ch; ch = s.charAt(i); i++) {
-            if ('^*/+-'.indexOf(ch) > -1) {
-                if (current == '' && ch == '-') {
-                    current = '-';
-                } else {
-                    calculation.push(parseFloat(current), ch);
-                    current = '';
+        var calculation = [],  //The place where the calculation itself is stored and returned at the bottom of the function.
+            current = '';  //The current string calculation. 
+        for (var i = 0, ch; ch = s.charAt(i); i++) {  //Iterate through the characters of the param. 
+            if ('^*/+-'.indexOf(ch) > -1) {  //Run this code If one of those characters exist in the parameter
+                if (current == '' && ch == '-') {  //If the string had invalid '' or - characters, change it to a valid one.
+                    current = '-'; 
+                } else {  //Otherwise, just push it to the calculation array, 
+                    calculation.push(parseFloat(current), ch);  //Push a floating point integer and the character to the calculation array.
+                    current = '';  //Reset the current variable.
                 }
-            } else {
+            } else {  // If the character doesn't exist, just add the character to the "current" variable.
                 current += s.charAt(i);
             }
         }
-        if (current != '') {
+        if (current != '') {  //If current isn't an empty string, push the calculation to the calculation array.
             calculation.push(parseFloat(current));
         }
-        return calculation;
+        return calculation;  //Return the value of the calculation array. 
     }
-
     calculate(calc) {
         // --- Perform a calculation expressed as an array of operators and numbers
         var ops = [{'^': (a, b) => Math.pow(a, b)},
@@ -67,27 +70,25 @@ class Calculator extends React.Component{
                    {'+': (a, b) => a + b, '-': (a, b) => a - b}],
             newCalc = [],
             currentOp;
-        for (var i = 0; i < ops.length; i++) {
-            for (var j = 0; j < calc.length; j++) {
-                console.log(ops[i][calc[j]])
-                if (ops[i][calc[j]]) {
-                  currentOp = ops[i][calc[j]];
-                } else if (currentOp) {
-                    newCalc[newCalc.length - 1] =
-                        currentOp(newCalc[newCalc.length - 1], calc[j]);
-                    currentOp = null;
+        for (var i = 0; i < ops.length; i++) {  //Cycle through the operations available in the ops array.
+            for (var j = 0; j < calc.length; j++) {  //Cycle through the array passed through the "calc" parameter on every iteration of the ops array.
+                if (ops[i][calc[j]]) {  //This is some two-dimensional array iteration. It's checking if the parameter "calc"'s calculation is present inside of the ops array. Probably looking for one of the * ^ * / - + symbols.
+                  currentOp = ops[i][calc[j]];  // Dump that found operation function to the currentOp variable
+                } else if (currentOp) {  //See if currentOp exists. 
+                    newCalc[newCalc.length - 1] = currentOp(newCalc[newCalc.length - 1], calc[j]);  //Place into into the array the return value of the currentOp function which will be equal to anything inside of the "ops" array.
+                    currentOp = null;  //Erase currentOp function (nullify it)
                 } else {
-                    newCalc.push(calc[j]);
+                    newCalc.push(calc[j]); //Push the next calculation into the newCalc array. 
                 }
             }
-            calc = newCalc;
-            newCalc = [];
+            calc = newCalc; //Set the param to just be newCalc instead of the parameter itself. 
+            newCalc = []; //Empty the newCalc array. 
         }
-        if (calc.length > 1) {
+        if (calc.length > 1) { //Error checking for the calc array.
             console.log('Error: unable to resolve calculation');
-            return calc;
+            return calc; //Return nothing
         } else {
-            return calc[0];
+            return calc[0]; //Return the first item in the calc array.
         }
     }
 
